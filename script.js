@@ -67,15 +67,22 @@ const getData = (url) => {
       return res.json();
     });
 };
+const getGeo = () => {
+  return new Promise((res, rej) => {
+    navigator.geolocation.getCurrentPosition(res, rej);
+  });
+};
 
-const whereAmI = (lat, lon) => {
-  const url = GEO_URL.replace('__LAT__', lat).replace('__LON__', lon);
-  getData(url)
+const whereAmI = () => {
+  getGeo()
+    .then(res => {
+      const {latitude: lat, longitude: lon} = res.coords;
+      const url = GEO_URL.replace('__LAT__', lat).replace('__LON__', lon);
+      return getData(url);
+    })
     .then(res => getData(BORDER_URL + res.address.country_code))
     .then(res => renderCountry(res[0]))
     .catch(err => console.log(err.message));
 };
-const coords1 = [52.508, 13.381];
-const coords2 = [19.037, 72.873];
-const coords3 = [-33.933, 18.474];
-whereAmI(...coords3);
+
+whereAmI();
