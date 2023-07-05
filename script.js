@@ -20,7 +20,6 @@ const renderCountry = (data, className = '') => {
   </article>`;
 
   countriesContainer.insertAdjacentHTML('beforeend', html);
-  countriesContainer.style.opacity = 1;
 };
 
 const getCountryData = (country) => {
@@ -39,14 +38,15 @@ const getCountryDataFetch = (country) => {
     .then(res => {
       renderCountry(res[0]);
       const neighbour = res[0].borders[0];
-      console.log(neighbour)
 
       if (!neighbour) return;
 
       return fetch(BORDER_URL + neighbour);
     })
     .then(res => res.json())
-    .then(res => renderCountry(res[0], 'neighbour'));
+    .then(res => renderCountry(res[0], 'neighbour'))
+    .catch(err => alert(err.message))
+    .finally(() => countriesContainer.style.opacity = 1);
 };
 
 getCountryDataFetch('usa');
