@@ -4,6 +4,7 @@ const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
 const URL = 'https://restcountries.com/v3.1/name/';
 const BORDER_URL = 'https://restcountries.com/v3.1/alpha/';
+const GEO_URL = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=__LAT__&lon=__LON__';
 
 ///////////////////////////////////////
 const renderCountry = (data, className = '') => {
@@ -45,9 +46,7 @@ const getCountryDataFetch = (country) => {
   getJSON(URL, country, 'Country not found')
     .then(res => {
       renderCountry(res[0]);
-      console.log(res[0])
       const neighbour = res[0].borders?.[0];
-      console.log(neighbour)
 
       if (!neighbour) throw new Error('There is no neighbour');
 
@@ -58,6 +57,25 @@ const getCountryDataFetch = (country) => {
     .finally(() => countriesContainer.style.opacity = 1);
 };
 
-getCountryDataFetch('australia');
-// getCountryData('russia');
+getCountryDataFetch('russia');
 
+const getData = (url) => {
+  return fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error(`Something went wrong! ${res.status}`);
+
+      return res.json();
+    });
+};
+
+const whereAmI = (lat, lon) => {
+  const url = GEO_URL.replace('__LAT__', lat).replace('__LON__', lon);
+  getData(url)
+    .then(res => getData(BORDER_URL + res.address.country_code))
+    .then(res => renderCountry(res[0]))
+    .catch(err => console.log(err.message));
+};
+const coords1 = [52.508, 13.381];
+const coords2 = [19.037, 72.873];
+const coords3 = [-33.933, 18.474];
+whereAmI(...coords3);
