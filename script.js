@@ -32,23 +32,32 @@ const getCountryData = (country) => {
   });
 };
 
+const getJSON = (url, country, errorMessage) =>
+  fetch(url + country)
+    .then(res => {
+      if (!res.ok) throw new Error(errorMessage);
+
+      return res.json();
+    });
+;
+
 const getCountryDataFetch = (country) => {
-  fetch(URL + country)
-    .then(res => res.json())
+  getJSON(URL, country, 'Country not found')
     .then(res => {
       renderCountry(res[0]);
-      const neighbour = res[0].borders[0];
+      console.log(res[0])
+      const neighbour = res[0].borders?.[0];
+      console.log(neighbour)
 
-      if (!neighbour) return;
+      if (!neighbour) throw new Error('There is no neighbour');
 
-      return fetch(BORDER_URL + neighbour);
+      return getJSON(BORDER_URL, neighbour, 'Country not found');
     })
-    .then(res => res.json())
     .then(res => renderCountry(res[0], 'neighbour'))
     .catch(err => alert(err.message))
     .finally(() => countriesContainer.style.opacity = 1);
 };
 
-getCountryDataFetch('usa');
+getCountryDataFetch('australia');
 // getCountryData('russia');
 
